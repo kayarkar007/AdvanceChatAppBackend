@@ -28,8 +28,9 @@ const io = socketIo(server, {
   cors: {
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
-      "https://advance-chat-app.vercel.app", // Your Vercel domain
-      "https://advance-chat-app.vercel.app/", // With trailing slash
+      "http://localhost:3000", // Local development
+      "http://localhost:5173", // Vite default port
+  
       "https://advancechatappfrontend.netlify.app", // Your Netlify domain
       "https://advancechatappfrontend.netlify.app/", // With trailing slash
       "http://192.168.1.0/24",
@@ -49,6 +50,8 @@ app.use(
   cors({
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
+      "http://localhost:3000", // Local development
+      "http://localhost:5173", // Vite default port
       "https://advance-chat-app.vercel.app", // Your Vercel domain
       "https://advance-chat-app.vercel.app/", // With trailing slash
       "https://advancechatappfrontend.netlify.app", // Your Netlify domain

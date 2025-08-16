@@ -144,7 +144,7 @@ userSchema.methods.getPublicProfile = function() {
     _id: this._id,
     firstName: this.firstName,
     lastName: this.lastName,
-    fullName: this.fullName,
+    fullName: `${this.firstName} ${this.lastName}`,
     initials: this.initials,
     email: this.email,
     avatar: this.avatar,
@@ -152,8 +152,8 @@ userSchema.methods.getPublicProfile = function() {
     statusMessage: this.statusMessage,
     isOnline: this.isOnline,
     lastSeen: this.lastSeen,
-    preferences: this.preferences
-  }
+    preferences: this.preferences,
+  };
 }
 
 // Method to update online status

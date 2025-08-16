@@ -139,14 +139,34 @@ router.get('/search', [
 // @desc    Get all users (for user search)
 // @access  Private
 router.get('/', authenticate, asyncHandler(async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.user._id } })
-    .select('-password -email')
-    .limit(50) // Limit to prevent performance issues
+  try {
+    const users = await User.find({ _id: { $ne: req.user._id } })
+      .select('firstName lastName email avatar status isOnline lastSeen')
+      .limit(50) // Limit to prevent performance issues
 
-  res.json({
-    message: 'Users retrieved successfully',
-    data: users.map(user => user.getPublicProfile())
-  })
+    const userProfiles = users.map(user => ({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      avatar: user.avatar,
+      status: user.status,
+      isOnline: user.isOnline,
+      lastSeen: user.lastSeen
+    }))
+
+    res.json({
+      message: 'Users retrieved successfully',
+      data: userProfiles
+    })
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    res.status(500).json({
+      message: 'Error fetching users',
+      data: []
+    })
+  }
 }))
 
 // @route   GET /api/users/online
