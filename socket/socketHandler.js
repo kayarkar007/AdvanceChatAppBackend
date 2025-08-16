@@ -371,22 +371,24 @@ const socketHandler = (io) => {
 
     // Handle disconnect
     socket.on('disconnect', async () => {
-      console.log(`User disconnected: ${socket.userId}`)
-      
-      // Remove user from connected users
-      connectedUsers.delete(socket.userId.toString())
+      console.log(`User disconnected: ${socket.userId}`);
 
-      // Update user's online status
+      // Remove user from connected users
+      connectedUsers.delete(socket.userId.toString());
+
+      // Update user's online status - with error handling
       try {
         await User.findByIdAndUpdate(socket.userId, {
           isOnline: false,
-          lastSeen: new Date()
-        })
+          lastSeen: new Date(),
+        });
 
         // Emit user offline event
-        socket.broadcast.emit('user:offline', socket.userId)
+        socket.broadcast.emit("user:offline", socket.userId);
       } catch (error) {
-        console.error('Error updating user offline status:', error)
+        console.error("Error updating user offline status:", error);
+        // Still emit offline event even if database update fails
+        socket.broadcast.emit("user:offline", socket.userId);
       }
     })
   })

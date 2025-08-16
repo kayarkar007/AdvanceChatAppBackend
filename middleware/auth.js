@@ -59,11 +59,20 @@ const authenticateSocket = async (socket, next) => {
     socket.user = user
     socket.userId = user._id
     
-    // Update user's online status
-    await user.updateOnlineStatus(true)
+    // Update user's online status - with error handling
+    try {
+      await User.findByIdAndUpdate(user._id, {
+        isOnline: true,
+        lastSeen: new Date()
+      })
+    } catch (updateError) {
+      console.error('Error updating online status:', updateError)
+      // Don't fail the connection if online status update fails
+    }
     
     next()
   } catch (error) {
+    console.error('Socket authentication error:', error)
     if (error.name === 'JsonWebTokenError') {
       return next(new Error('Authentication error: Invalid token'))
     }
