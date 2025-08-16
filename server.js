@@ -85,7 +85,7 @@ app.use('/uploads', express.static('uploads'))
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/conversations', conversationRoutes)
-app.use('/api/messages', messageRoutes)
+app.use('/api/messages', messageRoutes) // Mount messages routes separately
 app.use('/api/files', fileRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/calls', callRoutes)

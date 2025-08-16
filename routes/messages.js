@@ -8,39 +8,45 @@ const { authenticate, authorizeMessageAccess } = require('../middleware/auth')
 
 const router = express.Router()
 
-// @route   GET /api/conversations/:conversationId/messages
+// @route   GET /api/messages/conversations/:conversationId/messages
 // @desc    Get messages for conversation
 // @access  Private
-router.get('/conversations/:conversationId/messages', authenticate, asyncHandler(async (req, res) => {
-  const { conversationId } = req.params
-  const { page = 1, limit = 50 } = req.query
+router.get(
+  "/conversations/:conversationId/messages",
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const { conversationId } = req.params;
+    const { page = 1, limit = 50 } = req.query;
 
-  // Verify user is participant
-  const conversation = await Conversation.findById(conversationId)
-  if (!conversation) {
-    return res.status(404).json({ message: 'Conversation not found' })
-  }
+    // Verify user is participant
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
 
-  const isParticipant = conversation.participants.some(p => 
-    p.user.equals(req.user._id) && p.isActive
-  )
-  
-  if (!isParticipant) {
-    return res.status(403).json({ message: 'Not a participant of this conversation' })
-  }
+    const isParticipant = conversation.participants.some(
+      (p) => p.user.equals(req.user._id) && p.isActive
+    );
 
-  const messages = await Message.findForConversation(conversationId, {
-    limit: parseInt(limit),
-    before: req.query.before ? new Date(req.query.before) : undefined
+    if (!isParticipant) {
+      return res
+        .status(403)
+        .json({ message: "Not a participant of this conversation" });
+    }
+
+    const messages = await Message.findForConversation(conversationId, {
+      limit: parseInt(limit),
+      before: req.query.before ? new Date(req.query.before) : undefined,
+    });
+
+    res.json({
+      message: "Messages retrieved successfully",
+      data: messages,
+    });
   })
+);
 
-  res.json({
-    message: 'Messages retrieved successfully',
-    data: messages
-  })
-}))
-
-// @route   POST /api/conversations/:conversationId/messages
+// @route   POST /api/messages/conversations/:conversationId/messages
 // @desc    Send message to conversation
 // @access  Private
 router.post('/conversations/:conversationId/messages', [
@@ -79,7 +85,7 @@ router.post('/conversations/:conversationId/messages', [
     conversation: conversationId,
     sender: req.user._id,
     type,
-    content,
+    content: type === 'text' ? { text: content } : content,
     replyTo,
     metadata: {
       clientId: req.body.clientId,
@@ -92,6 +98,9 @@ router.post('/conversations/:conversationId/messages', [
   await message.save()
   await message.populate('sender', 'firstName lastName email avatar')
   await message.populate('replyTo')
+  
+  // Ensure virtuals are included
+  message.set('displayContent', message.displayContent)
 
   // Update conversation last message
   conversation.lastMessage = message._id
@@ -263,7 +272,7 @@ router.post('/:id/forward', [
   })
 }))
 
-// @route   GET /api/conversations/:conversationId/messages/search
+// @route   GET /api/messages/conversations/:conversationId/messages/search
 // @desc    Search messages in conversation
 // @access  Private
 router.get('/conversations/:conversationId/messages/search', authenticate, asyncHandler(async (req, res) => {
