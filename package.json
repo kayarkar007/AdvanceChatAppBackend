@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "dev:network": "HOST=0.0.0.0 nodemon server.js",
-    "test": "jest"
+    "test": "jest",
+    "create-test-users": "node scripts/createTestUsers.js",
+    "create-production-users": "node scripts/createProductionUsers.js"
   },
   "keywords": ["chat", "socket.io", "express", "mongodb", "real-time"],
   "author": "Your Name",

@@ -135,6 +135,20 @@ router.get('/search', [
   })
 }))
 
+// @route   GET /api/users
+// @desc    Get all users (for user search)
+// @access  Private
+router.get('/', authenticate, asyncHandler(async (req, res) => {
+  const users = await User.find({ _id: { $ne: req.user._id } })
+    .select('-password -email')
+    .limit(50) // Limit to prevent performance issues
+
+  res.json({
+    message: 'Users retrieved successfully',
+    data: users.map(user => user.getPublicProfile())
+  })
+}))
+
 // @route   GET /api/users/online
 // @desc    Get online users
 // @access  Private
