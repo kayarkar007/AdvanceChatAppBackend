@@ -75,75 +75,100 @@ const sendPasswordResetEmail = async (user, token) => {
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', [
-  authRateLimiter,
-  body('firstName')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters'),
-  body('lastName')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email address'),
-  body('password')
-    .isLength({ min: 8 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('Password must be at least 8 characters and contain uppercase, lowercase, number and special character')
-], asyncHandler(async (req, res) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      message: 'Validation failed',
-      errors: errors.array()
-    })
-  }
-
-  const { firstName, lastName, email, password } = req.body
-
-  // Check if user already exists
-  const existingUser = await User.findOne({ email })
-  if (existingUser) {
-    return res.status(400).json({ message: 'User with this email already exists' })
-  }
-
-  // Create verification token
-  const emailVerificationToken = crypto.randomBytes(32).toString('hex')
-  const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-
-  // Create user
-  const user = new User({
-    firstName,
-    lastName,
-    email,
-    password,
-    emailVerificationToken,
-    emailVerificationExpires
-  })
-
-  await user.save()
-
-  // Send verification email
-  try {
-    await sendVerificationEmail(user, emailVerificationToken)
-  } catch (error) {
-    console.error('Failed to send verification email:', error)
-  }
-
-  // Generate token
-  const token = generateToken(user._id)
-
-  res.status(201).json({
-    message: 'User registered successfully. Please check your email to verify your account.',
-    data: {
-      user: user.getPublicProfile(),
-      token
+router.post(
+  "/register",
+  [
+    authRateLimiter,
+    body("username")
+      .trim()
+      .isLength({ min: 3, max: 30 })
+      .matches(/^[a-zA-Z0-9_]+$/)
+      .withMessage(
+        "Username must be between 3 and 30 characters and contain only letters, numbers, and underscores"
+      ),
+    body("firstName")
+      .trim()
+      .isLength({ min: 2, max: 50 })
+      .withMessage("First name must be between 2 and 50 characters"),
+    body("lastName")
+      .trim()
+      .isLength({ min: 2, max: 50 })
+      .withMessage("Last name must be between 2 and 50 characters"),
+    body("email")
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Please provide a valid email address"),
+    body("password")
+      .isLength({ min: 8 })
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
+      )
+      .withMessage(
+        "Password must be at least 8 characters and contain uppercase, lowercase, number and special character"
+      ),
+  ],
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: errors.array(),
+      });
     }
+
+    const { username, firstName, lastName, email, password } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "User with this email already exists" });
+    }
+
+    // Check if username already exists
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+
+    // Create verification token
+    const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+    const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+    // Create user
+    const user = new User({
+      username,
+      firstName,
+      lastName,
+      email,
+      password,
+      emailVerificationToken,
+      emailVerificationExpires,
+    });
+
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(user, emailVerificationToken);
+    } catch (error) {
+      console.error("Failed to send verification email:", error);
+    }
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      message:
+        "User registered successfully. Please check your email to verify your account.",
+      data: {
+        user: user.getPublicProfile(),
+        token,
+      },
+    });
   })
-}))
+);
 
 // @route   POST /api/auth/login
 // @desc    Login user

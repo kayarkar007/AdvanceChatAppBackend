@@ -2,6 +2,15 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
 const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: [true, 'Username is required'],
+    unique: true,
+    trim: true,
+    minlength: [3, 'Username must be at least 3 characters'],
+    maxlength: [30, 'Username cannot exceed 30 characters'],
+    match: [/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores']
+  },
   firstName: {
     type: String,
     required: [true, 'First name is required'],
@@ -17,6 +26,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Email is required'],
+    unique: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
@@ -107,6 +117,7 @@ const userSchema = new mongoose.Schema({
 
 // Indexes
 userSchema.index({ email: 1 })
+userSchema.index({ username: 1 })
 userSchema.index({ isOnline: 1 })
 userSchema.index({ lastSeen: 1 })
 
@@ -142,6 +153,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.getPublicProfile = function() {
   return {
     _id: this._id,
+    username: this.username,
     firstName: this.firstName,
     lastName: this.lastName,
     fullName: `${this.firstName} ${this.lastName}`,

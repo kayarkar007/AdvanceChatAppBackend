@@ -141,11 +141,14 @@ router.get('/search', [
 router.get('/', authenticate, asyncHandler(async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: req.user._id } })
-      .select('firstName lastName email avatar status isOnline lastSeen')
-      .limit(50) // Limit to prevent performance issues
+      .select(
+        "username firstName lastName email avatar status isOnline lastSeen"
+      )
+      .limit(50); // Limit to prevent performance issues
 
-    const userProfiles = users.map(user => ({
+    const userProfiles = users.map((user) => ({
       _id: user._id,
+      username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
       fullName: `${user.firstName} ${user.lastName}`,
@@ -153,8 +156,8 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
       avatar: user.avatar,
       status: user.status,
       isOnline: user.isOnline,
-      lastSeen: user.lastSeen
-    }))
+      lastSeen: user.lastSeen,
+    }));
 
     res.json({
       message: 'Users retrieved successfully',
