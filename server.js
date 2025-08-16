@@ -30,6 +30,8 @@ const io = socketIo(server, {
       process.env.CLIENT_URL || "http://localhost:3000",
       "https://advance-chat-app.vercel.app", // Your Vercel domain
       "https://advance-chat-app.vercel.app/", // With trailing slash
+      "https://advancechatappfrontend.netlify.app", // Your Netlify domain
+      "https://advancechatappfrontend.netlify.app/", // With trailing slash
       "http://192.168.1.0/24",
       "http://10.0.0.0/8",
       "http://172.16.0.0/12",
@@ -49,6 +51,8 @@ app.use(
       process.env.CLIENT_URL || "http://localhost:3000",
       "https://advance-chat-app.vercel.app", // Your Vercel domain
       "https://advance-chat-app.vercel.app/", // With trailing slash
+      "https://advancechatappfrontend.netlify.app", // Your Netlify domain
+      "https://advancechatappfrontend.netlify.app/", // With trailing slash
       "http://192.168.1.0/24", // Allow local network IPs
       "http://10.0.0.0/8", // Allow local network IPs
       "http://172.16.0.0/12", // Allow local network IPs
