@@ -28,28 +28,36 @@ const io = socketIo(server, {
   cors: {
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
+      "https://advance-chat-app.vercel.app", // Your Vercel domain
+      "https://advance-chat-app.vercel.app/", // With trailing slash
       "http://192.168.1.0/24",
       "http://10.0.0.0/8",
-      "http://172.16.0.0/12"
+      "http://172.16.0.0/12",
     ],
     methods: ["GET", "POST"],
-    credentials: true
-  }
-})
+    credentials: true,
+  },
+});
 
 // Middleware
-app.use(helmet())
-app.use(compression())
-app.use(morgan('combined'))
-app.use(cors({
-  origin: [
-    process.env.CLIENT_URL || "http://localhost:3000",
-    "http://192.168.1.0/24", // Allow local network IPs
-    "http://10.0.0.0/8",     // Allow local network IPs
-    "http://172.16.0.0/12"   // Allow local network IPs
-  ],
-  credentials: true
-}))
+app.use(helmet());
+app.use(compression());
+app.use(morgan("combined"));
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_URL || "http://localhost:3000",
+      "https://advance-chat-app.vercel.app", // Your Vercel domain
+      "https://advance-chat-app.vercel.app/", // With trailing slash
+      "http://192.168.1.0/24", // Allow local network IPs
+      "http://10.0.0.0/8", // Allow local network IPs
+      "http://172.16.0.0/12", // Allow local network IPs
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
